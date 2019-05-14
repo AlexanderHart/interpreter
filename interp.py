@@ -1,6 +1,13 @@
 import re
 from collections import OrderedDict 
 
+#########################
+# Example input:
+# x_1=2;y_2=x_1;
+#
+# PLEASE DO NOT INCLUDE SPACES (WHITE SPACE) IN THE INPUT!
+#########################
+
 class Token(object):
     def __init__(self, type, value):
         self.type = type

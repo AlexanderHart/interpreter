@@ -5,6 +5,8 @@ from collections import OrderedDict
 # Example input:
 # x_1=2;y_2=x_1;
 #
+# PLEASE ENTER INPUT AS SINGLE STREAM OF CHARACTERS.
+#
 # PLEASE DO NOT INCLUDE SPACES (WHITE SPACE) IN THE INPUT!
 #########################
 

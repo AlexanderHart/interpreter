@@ -20,23 +20,23 @@ class Interpreter(object):
         self.pos = 0
         self.current_token = None
         self.current_char = self.text[self.pos]
-        self.a = []
+        self.symbolDict = []
 
     # Helper method for verifying if an identifier
     # was already previously initialized.
     def checkSymbolDict(self, valueInput):
       booleanValue = False
-      for i in range(len(self.a)):
-        if str(self.a[i][0]) == valueInput:
+      for i in range(len(self.symbolDict)):
+        if str(self.symbolDict[i][0]) == valueInput:
           booleanValue = True
       
       return booleanValue
 
     # Output the symbolDictionary.
     def output(self):
-      for i in range(len(self.a)):
-        for j in range(len(self.a[i])-1):
-          print(str(self.a[i][j]) + " = " + str(self.a[i][j+1]))
+      for i in range(len(self.symbolDict)):
+        for j in range(len(self.symbolDict[i])-1):
+          print(str(self.symbolDict[i][j]) + " = " + str(self.symbolDict[i][j+1]))
 
     # Increment the text character counter.
     def nextPos(self):
@@ -68,6 +68,20 @@ class Interpreter(object):
 
       return str(result)
 
+    def isLiteral(self, text):
+      if (re.search("^0?[1-9]+", text)):
+        return True
+      else:
+        return False 
+    
+    def integer(self):
+        """Return a (multidigit) integer consumed from the input."""
+        result = ''
+        while self.current_char is not None and self.current_char.isdigit():
+            result = result + self.current_char
+            self.nextPos()
+        return result
+
     # Find (and create an instance of) the next token based on
     # the current character.
     def find_next_token(self):
@@ -77,9 +91,12 @@ class Interpreter(object):
             return Token('EOF', None)
 
         if self.current_char.isdigit():
-            token = Token('INTEGER', int(self.current_char))
-            self.a[len(self.a)-1][1] = int(self.current_char)
-            self.nextPos()
+            x = self.integer()
+            token = Token('INTEGER', x)
+
+            # Modify the last appended list element with the accepted digit value
+            #self.a[len(self.a)-1][1] = int(self.current_char)
+           # self.nextPos()
             return token
 
         g = self.Identifier(self.current_char)
@@ -126,7 +143,7 @@ class Interpreter(object):
            # Un-comment for debugging purposes. 
            # print(identifier.value)
            
-            self.a.append([identifier.value,str(0)])
+            self.symbolDict.append([identifier.value,str(0)])
             self.fetch_next_token('IDENTIFIER')
 
           operation = self.current_token
@@ -140,7 +157,7 @@ class Interpreter(object):
           if rhs.type is not 'INTEGER':
             if rhs.type is 'IDENTIFIER':
               if self.checkSymbolDict(rhs.value):
-                self.a[len(self.a)-1][1] = str(self.a[len(self.a)-2][1])
+                self.symbolDict[len(self.symbolDict)-1][1] = str(self.symbolDict[len(self.symbolDict)-2][1])
                 self.fetch_next_token('IDENTIFIER')
                 break
               else:
@@ -148,8 +165,11 @@ class Interpreter(object):
             self.error('Expected an <INTEGER>')
             break
           else:
-            self.a[len(self.a)-1][1] = str(rhs.value)
-            self.fetch_next_token('INTEGER')
+            if self.isLiteral(rhs.value):
+              self.symbolDict[len(self.symbolDict)-1][1] = str(rhs.value)
+              self.fetch_next_token('INTEGER')
+            else:
+              self.error('Expected an <LITERAL>')
 
           semi = self.current_token
           if semi.type is 'EOF':
